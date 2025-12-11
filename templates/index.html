@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Seguimiento de Egresados UMB</title>
+<link rel="icon" href="/static/img/favicon.ico" type="Image/x-icon">
+
+<link rel="stylesheet" href="/static/css/index.css" />
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    main {
+        flex: 1;
+    }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <a class="navbar-brand" href="#">
+            <img src="/static/img/umb.png" alt="Logo" width="160" height="55" style="object-fit: cover;">
+        </a>
+
+        <!-- BOTÓN QUE ABRE EL MODAL -->
+        <div class="d-flex">
+            <a href="#" class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">
+                Iniciar Sesión
+            </a>
+        </div>
+    </div>
+</nav>
+
+<header class="header text-center p-4">
+    <h1>Seguimiento de egresados UMB San José del Rincón</h1>
+</header>
+
+<main class="container text-center mt-4">
+    <img src="/static/img/fondo.png" alt="Imagen principal" class="main-image" />
+</main>
+
+<footer class="footer text-center p-3 bg-dark text-white">
+    <p>© 2025 UMB San José del Rincón - Todos los derechos reservados</p>
+</footer>
+
+
+<!-- ===================================================== -->
+<!--      MODAL DE INICIAR SESIÓN                          -->
+<!-- ===================================================== -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <div class="modal-header">
+                <h5 class="modal-title">        Iniciar Sesión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="/login" method="POST">
+
+                <div class="modal-body">
+
+                    <!-- Usuario -->
+                    <label class="form-label">Usuario</label>
+                    <input type="email" class="form-control" name="correo"
+                        placeholder="Agrega tu correo electrónico" required>
+
+                    <!-- Contraseña -->
+                    <label class="form-label mt-3">Contraseña</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" name="password"
+                            placeholder="********" id="passwordInput" required>
+
+                        <!-- Ícono estándar -->
+                        <span class="input-group-text" id="togglePassword">
+                            <i class="bi bi-eye" id="iconEye"></i>
+                        </span>
+                    </div>
+
+                    <!-- Error -->
+                    {% if error %}
+                    <p class="text-danger text-center mt-2">{{ error }}</p>
+                    {% endif %}
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark w-100">Acceder</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Mostrar / Ocultar contraseña -->
+<script>
+document.getElementById("togglePassword").addEventListener("click", function () {
+    const pwd = document.getElementById("passwordInput");
+    const icon = document.getElementById("iconEye");
+
+    if (pwd.type === "password") {
+        pwd.type = "text";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+    } else {
+        pwd.type = "password";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+    }
+});
+</script>
+
+<script>
+// Limpiar el contenido del mensaje de error al cerrar el modal
+document.getElementById('loginModal').addEventListener('hidden.bs.modal', function () {
+    const errorMsg = document.querySelector('#loginModal .text-danger');
+    if (errorMsg) {
+        errorMsg.remove(); // Elimina el mensaje de error
+    }
+
+    // Opcional: limpiar los inputs para más limpieza
+    document.querySelector('#loginModal form').reset();
+});
+</script>
+
+
+<!-- Mantener el modal abierto si hay error -->
+{% if abrir_modal %}
+<script>
+    var loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+    loginModal.show();
+</script>
+{% endif %}
+
+</body>
+</html>

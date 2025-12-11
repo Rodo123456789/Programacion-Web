@@ -1,72 +1,69 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = "clave_secreta_super_segura"
 
-def validar_usuario(username, password):
-    conn = sqlite3.connect("base.db")
+# -----------------------------------------
+# CONEXIÓN A LA BASE DE DATOS
+# -----------------------------------------
+def get_db_connection():
+    conn = sqlite3.connect("seguimiento_egresados.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# -----------------------------------------
+# RUTA PRINCIPAL
+# -----------------------------------------
+@app.route("/")
+def index():
+    error = session.pop("error", None)   # Recupera error solo una vez
+    return render_template("index.html", error=error, abrir_modal=bool(error))
+
+
+# -----------------------------------------
+# LOGIN
+# -----------------------------------------
+@app.route("/login", methods=["POST"])
+def login():
+    correo = request.form["correo"]
+    password = request.form["password"]
+
+    conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM usuarios WHERE username=? AND password=?", (username, password))
-    usuario = cursor.fetchone()
+    cursor.execute("SELECT * FROM admin WHERE correo=? AND password=?", (correo, password))
+    admin = cursor.fetchone()
 
     conn.close()
-    return usuario
+
+    # SI LOGIN CORRECTO
+    if admin:
+        session["admin"] = correo
+        return redirect("/dashboard")
+
+    # SI LOGIN INCORRECTO
+    session["error"] = "Datos incorrectos: usuario o contraseña"
+    return redirect("/")
 
 
-@app.route("/", methods=["GET", "POST"])
-def login():
-    error = None
 
-    if request.method == "POST":
-        user = request.form["username"]
-        pwd = request.form["password"]
+# -----------------------------------------
+# DASHBOARD (PROTEGIDO)
+# -----------------------------------------
+@app.route("/dashboard")
+def dashboard():
+    if "admin" not in session:
+        return redirect(url_for("index"))
+    return render_template("dashboard_egresados.html")
 
-        if validar_usuario(user, pwd):
-            return redirect(url_for("bienvenido", username=user))
-        else:
-            error = "Usuario o contraseña incorrectos"
-
-    return render_template("login.html", error=error)
-
-
-@app.route("/bienvenido/<username>")
-def bienvenido(username):
-    return render_template("bienvenido.html", username=username)
-
-
+# -----------------------------------------
+# CERRAR SESIÓN
+# -----------------------------------------
 @app.route("/logout")
 def logout():
-    return redirect(url_for("login"))
-
-@app.route("/registro", methods=["GET", "POST"])
-def registro():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        conn = sqlite3.connect("base.db")
-        cursor = conn.cursor()
-
-        # Verificar si el usuario ya existe
-        cursor.execute("SELECT * FROM usuarios WHERE username = ?", (username,))
-        existe = cursor.fetchone()
-
-        if existe:
-            conn.close()
-            return render_template("registro.html", error="El usuario ya existe.")
-
-        # Insertar nuevo usuario
-        cursor.execute("INSERT INTO usuarios (username, password) VALUES (?, ?)",
-                       (username, password))
-
-        conn.commit()
-        conn.close()
-
-        return redirect("/")  # vuelve al login
-
-    return render_template("registro.html")
-
+    session.clear()
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":

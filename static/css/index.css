@@ -1,0 +1,63 @@
+/* ======= ESTILOS GENERALES ======= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+header.header h1 {
+    font-size: 2.6rem;
+}
+
+.modal-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.6rem; /* ajusta a tu gusto */
+}
+
+/* ======= HEADER ======= */
+.header {
+    background-color: #f2f2f2;
+    color: #333;
+    padding: 20px 0;
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* ======= IMAGEN PRINCIPAL ======= */
+.main-image {
+    max-width: 80%;
+    height: auto;
+    border-radius: 10px;
+   
+}
+
+/* ======= FOOTER ======= */
+.footer {
+    background-color: #212529; /* mismo color del navbar */
+    color: white;
+    width: 100%;
+    margin-top: auto;
+}
+
+
+/* Imagen principal con control de tamaño */
+.main-image {
+    width: 70%;        /* Ajusta aquí el tamaño horizontal */
+    max-width: 550px;  /* Tamaño máximo permitido */
+    height: auto;      /* Mantiene proporción */
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;    /* Centrar la imagen */
+    
+}
+
+/* Si quieres que la imagen cambie especialmente para pantallas pequeñas */
+@media (max-width: 768px) {
+    .main-image {
+        width: 90%;    /* Más grande en móviles */
+    }
+}
