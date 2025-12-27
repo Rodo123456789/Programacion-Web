@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Egresados</title>
+
+<link rel="icon" href="/static/img/favicon.ico" type="Image/x-icon">
+<link rel="stylesheet" href="/static/css/egresados.css" />
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="/static/img/umb.png" alt="Logo" width="160" height="55">
+        </a>
+        <button class="btn btn-outline-light ms-auto" onclick="toggleMenu()">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- PANEL -->
+<div id="menuPanel" class="panel-menu">
+    <div class="text-center p-3 border-bottom">
+        <strong>Acciones</strong>
+    </div>
+    <div class="list-group list-group-flush">
+        <a href="/dashboard" class="list-group-item">Inicio</a>
+        <button class="list-group-item"
+                data-bs-toggle="modal"
+                data-bs-target="#login2Modal">
+            Agregar administrador
+        </button>
+        <button class="list-group-item text-danger d-flex gap-2" onclick="confirmarLogout()">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </button>
+    </div>
+</div>
+
+<div id="msg-exito"
+     class="alert alert-success text-center position-fixed top-0 start-50 translate-middle-x mt-3"
+     style="display:none; z-index:2000;">
+    Egresado registrado correctamente
+</div>
+
+
+<!-- CONTENIDO -->
+<main class="container-fluid mt-4 px-4">
+
+<h2 class="text-center fw-bold">Egresados registrados</h2>
+
+<div class="text-center mt-3 mb-3">
+    <button class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+        <i class="bi bi-plus-circle"></i> Nuevo
+    </button>
+</div>
+
+<!-- BUSCADOR -->
+<form class="d-flex justify-content-end mb-3" onsubmit="return false;">
+  <div class="input-group" style="max-width:300px; position:relative;">
+    
+    <span class="input-group-text">
+      <i class="bi bi-search"></i>
+    </span>
+
+    <input type="text"
+      id="inputBuscar"
+      class="form-control"
+      placeholder="Buscar..."
+      value="{{ buscar }}"
+      autocomplete="off">
+
+    <!-- BOTÓN X -->
+    <span id="clearBuscar"
+      class="input-group-text"
+      style="cursor:pointer; display:none;">
+      <i class="bi bi-x"></i>
+    </span>
+
+  </div>
+</form>
+
+<!-- TABLA -->
+<div class="table-responsive">
+<table class="table table-striped table-bordered text-center align-middle">
+<thead class="table-dark">
+<tr>
+    <th>Nombre</th>
+    <th>Carrera</th>
+    <th>Matrícula</th>
+    <th>Generación</th>
+    <th>Modalidad</th>
+    <th>Municipio</th>
+    <th>Localidad</th>
+    <th>Género</th>
+    <th>Teléfono</th>
+    <th>Correo</th>
+    <th>Estatus</th>
+    <th>Fotografía</th>
+    <th>Acciones</th>
+</tr>
+</thead>
+
+<tbody>
+{% for egresado in egresados %}
+<tr>
+    <td>{{ egresado.nombre_completo }}</td>
+    <td>{{ egresado.nombre_carrera }}</td>
+    <td>{{ egresado.matricula }}</td>
+    <td>{{ egresado.generacion }}</td>
+    <td>{{ egresado.modalidad }}</td>
+    <td>{{ egresado.nombre_municipio }}</td>
+    <td>{{ egresado.nombre_localidad }}</td>
+    <td>{{ egresado.genero }}</td>
+    <td>{{ egresado.telefono }}</td>
+    <td>{{ egresado.correo }}</td>
+    <td>
+    {% if egresado.estatus == "No titulado" %}
+        <span class="badge-estatus badge-egresado">No titulado</span>
+
+    {% elif egresado.estatus == "En proceso" %}
+        <span class="badge-estatus badge-seguimiento">En proceso</span>
+
+    {% elif egresado.estatus == "Titulado" %}
+        <span class="badge-estatus badge-titulado">Titulado</span>
+
+    {% else %}
+        {{ egresado.estatus }}
+    {% endif %}
+</td>
+
+
+    <td>
+    {% if egresado.fotografia %}
+        <div class="foto-circulo-tabla">
+            <img src="{{ url_for('static', filename='uploads/egresados/' ~ egresado.fotografia) }}">
+        </div>
+    {% else %}
+        <div class="foto-circulo-tabla">
+            <img src="/static/img/fondo_egresado.png">
+        </div>
+    {% endif %}
+</td>
+
+
+    <td>
+    <div class="acciones-columna">
+
+        <button class="btn btn-warning btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#modalEditar"
+                onclick="cargarEgresado('{{ egresado.id_egresado }}')">
+            Actualizar
+        </button>
+
+
+        <a href="/eliminar_egresado/{{ egresado.id_egresado }}?pagina={{ pagina }}&buscar={{ buscar }}"
+          class="btn btn-danger btn-sm"
+          onclick="return confirm('¿Seguro que deseas eliminar este egresado?');">
+          Eliminar
+        </a>
+
+
+
+    </div>
+</td>
+
+
+</tr>
+{% endfor %}
+</tbody>
+
+</table>
+</div>
+
+<!-- PAGINADO -->
+<div class="paginacion">
+
+{# ===== ANTERIOR ===== #}
+{% if pagina > 1 %}
+    <a href="?pagina={{ pagina-1 }}&buscar={{ buscar }}">Anterior</a>
+{% else %}
+    <span class="disabled">Anterior</span>
+{% endif %}
+
+{# ===== PRIMERA PÁGINA ===== #}
+{% if pagina == 1 %}
+    <span class="pagina-activa">1</span>
+{% else %}
+    <a class="pagina" href="?pagina=1&buscar={{ buscar }}">1</a>
+{% endif %}
+
+{# ===== PUNTOS SI HAY SALTO ===== #}
+{% if pagina > 3 %}
+    <span class="puntos">...</span>
+{% endif %}
+
+{# ===== PÁGINA ACTUAL (SI NO ES 1 NI ÚLTIMA) ===== #}
+{% if pagina > 1 and pagina < total_paginas %}
+    <span class="pagina-activa">{{ pagina }}</span>
+{% endif %}
+
+{# ===== PUNTOS ANTES DE LA ÚLTIMA ===== #}
+{% if pagina < total_paginas - 2 %}
+    <span class="puntos">...</span>
+{% endif %}
+
+{# ===== ÚLTIMA PÁGINA ===== #}
+{% if total_paginas > 1 %}
+    {% if pagina == total_paginas %}
+        <span class="pagina-activa">{{ total_paginas }}</span>
+    {% else %}
+        <a class="pagina" href="?pagina={{ total_paginas }}&buscar={{ buscar }}">
+            {{ total_paginas }}
+        </a>
+    {% endif %}
+{% endif %}
+
+{# ===== SIGUIENTE ===== #}
+{% if pagina < total_paginas %}
+    <a href="?pagina={{ pagina+1 }}&buscar={{ buscar }}">Siguiente</a>
+{% else %}
+    <span class="disabled">Siguiente</span>
+{% endif %}
+
+</div>
+
+</main>
+
+<!-- ======================= -->
+<!--   MODAL LOGIN2          -->
+<!-- ======================= -->
+<div class="modal fade" id="login2Modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Solo personal autorizado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="/login2" method="POST">
+
+                <div class="modal-body">
+
+                    <label class="form-label">Usuario</label>
+                    <input type="email" class="form-control" name="correo"
+                        placeholder="Agrega el correo electrónico" required>
+
+
+                    <label class="form-label mt-3">Contraseña</label>
+                    <h1>CONTRA</h1>
+
+                    <div class="input-group">
+                        <input type="password" class="form-control"
+                            name="password" id="passwordInput2"
+                            placeholder="********" required>
+
+                        <span class="input-group-text" id="togglePassword2">
+                            <i class="bi bi-eye" id="iconEye2"></i>
+                        </span>
+                    </div>
+
+                    {% if error2 %}
+                    <p class="text-danger text-center mt-2">{{ error2 }}</p>
+                    {% endif %}
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark w-100">Acceder</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NUEVO EGRESADO -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+
+      <form id="form-egresado" method="POST" action="/registrar_egresado" enctype="multipart/form-data">
+
+        <!-- HEADER SIN COLOR -->
+        <div class="modal-header">
+          <h5 class="modal-title">Registrar egresado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- CUERPO CON SCROLL -->
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+
+          <div class="mb-2">
+            <label>Nombre completo</label>
+            <input type="text" name="nombre_completo" class="form-control"
+              required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+              maxlength="100">
+          </div>
+
+          <div class="mb-2">
+            <label>Matrícula</label>
+            <input type="text" name="matricula" class="form-control"
+              required pattern="[0-9]+"
+              maxlength="8">
+              <div id="alert_matricula" class="alert alert-danger" style="display:none"></div>
+
+          </div>
+
+          <div class="mb-2">
+            <label>Carrera</label>
+            <select name="id_carrera" class="form-select" required>
+                <option value="" disabled selected>Seleccione una carrera</option>
+
+                {% for c in carreras %}
+                    <option value="{{ c.id_carrera }}">
+                        {{ c.nombre_carrera }}
+                    </option>
+                {% endfor %}
+            </select>
+            </div>
+
+
+          <div class="mb-2">
+            <label>Generación</label>
+            <input type="text" name="generacion" class="form-control" required
+            placeholder="Ej. 2005-2009"
+            maxlength="9">
+          </div>
+
+          <div class="mb-2">
+            <label>Estatus</label>
+            <select name="estatus" id="selectEstatus" class="form-select" required>
+              <option value="" disabled selected>Seleccione una opción</option>
+              <option>No titulado</option>
+              <option>En proceso</option>
+              <option>Titulado</option>
+            </select>
+          </div>
+
+          <!-- SELECT MODALIDAD -->
+          <div class="mb-2">
+            <label>Modalidad</label>
+            <select name="modalidad" id="selectModalidad" class="form-select" required>
+              <option value="" disabled selected>Seleccione una opción</option>
+              <option>I. Tesis profesional</option>
+              <option>II. Proyecto</option>
+              <option>III. Seminario de titulación</option>
+              <option>IV. Posgrado</option>
+              <option>V. Promedio General Sobresaliente</option>
+              <option>VI. Memoria de experiencia profesional</option>
+              <option>VII. Examen EGEL</option>
+              <option>VIII. Residencia profesional</option>
+              <option>IX. Mérito Escolar</option>
+              <option>X. Intervención en la gestión docente</option>
+              <option>XI. Memoria de servicio social</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label>Municipio</label>
+            <select name="id_municipio" id="selectMunicipio" class="form-select" required>
+                <option value="" disabled selected>Seleccione un municipio</option>
+
+                {% for m in municipios %}
+                    <option value="{{ m.id_municipio }}">
+                        {{ m.nombre_municipio }}
+                    </option>
+                {% endfor %}
+            </select>
+            </div>
+
+
+          <div class="mb-2">
+            <label>Localidad</label>
+            <select name="id_localidad" id="selectLocalidad" class="form-select" required disabled>
+                <option value="" disabled selected>Seleccione una localidad</option>
+
+                {% for l in localidades %}
+                    <option value="{{ l.id_localidad }}"
+                            data-municipio="{{ l.id_municipio }}">
+                        {{ l.nombre_localidad }}
+                    </option>
+                {% endfor %}
+                </select>
+
+            </div>
+
+
+          <div class="mb-2">
+            <label>Género</label>
+            <select name="genero" class="form-select" required>
+              <option value="" disabled selected>Seleccione una opción</option>
+              <option>Masculino</option>
+              <option>Femenino</option>
+              <option>Otro</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label>Teléfono</label>
+            <input type="text" name="telefono" class="form-control"
+              required 
+              pattern="[0-9]{10}"
+              maxlength="10"
+              placeholder="Solo números">
+              <div id="alert_telefono" class="alert alert-danger" style="display:none"></div>
+
+          </div>
+
+          <div class="mb-2">
+            <label>Correo</label>
+            <input type="email" name="correo" class="form-control" required
+            maxlength="100"
+            placeholder="Ej. nombre@gmail.com">
+            <div id="alert_correo" class="alert alert-danger" style="display:none"></div>
+
+          </div>
+
+          
+
+          <!-- FOTOGRAFÍA -->
+          <div class="mb-2">
+
+            <label class="form-label">Fotografía</label>
+
+            <!-- INPUT -->
+            <input type="file"
+                   name="fotografia"
+                   id="fotoInput"
+                   class="form-control"
+                   accept="image/*"
+                   required>
+
+            <!-- CÍRCULO ABAJO -->
+            <div id="previewWrapper"
+                 style="width:130px;
+                        height:130px;
+                        border-radius:50%;
+                        overflow:hidden;
+                        margin:12px auto 0 auto;
+                        border:2px solid #ccc;
+                        background-size:cover;
+                        background-position:center;
+                        background-image:url('/static/img/fondo_egresado.png');">
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button class="btn btn-success" type="submit">Registrar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!--Form para actualizar ..............................................................................................-->
+
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+
+      <form method="POST" action="/actualizar_egresado" enctype="multipart/form-data">
+
+        <!-- ID OCULTO -->
+        <input type="hidden" name="id_egresado" id="edit_id">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Actualizar egresado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
+
+          <!-- NOMBRE -->
+          <div class="mb-2">
+            <label>Nombre completo</label>
+            <input type="text" name="nombre_completo" id="edit_nombre"
+                   class="form-control" required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+                   maxlength="100">
+          </div>
+
+          <!-- MATRÍCULA -->
+          <div class="mb-2">
+            <label>Matrícula</label>
+            <input type="text" name="matricula" id="edit_matricula"
+                   class="form-control" required
+                   required pattern="[0-9]+"
+                   maxlength="8">
+                   <div id="alert_edit_matricula" class="alert alert-danger" style="display:none"></div>
+
+          </div>
+
+          <!-- CARRERA -->
+          <div class="mb-2">
+            <label>Carrera</label>
+            <select name="id_carrera" id="edit_carrera"
+                    class="form-select" required>
+              {% for c in carreras %}
+                <option value="{{ c.id_carrera }}">{{ c.nombre_carrera }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- GENERACIÓN -->
+          <div class="mb-2">
+            <label>Generación</label>
+            <input type="text" name="generacion" id="edit_generacion"
+                   class="form-control" required
+                   placeholder="Ej. 2005-2009"
+                   maxlength="9">
+          </div>
+
+          <!-- ESTATUS -->
+          <div class="mb-2">
+            <label>Estatus</label>
+            <select name="estatus" id="edit_estatus"
+                    class="form-select" required>
+              <option>No titulado</option>
+              <option>En proceso</option>
+              <option>Titulado</option>
+            </select>
+          </div>
+
+          <!-- MODALIDAD -->
+          <div class="mb-2">
+            <label>Modalidad</label>
+            <select name="modalidad" id="edit_modalidad"
+                    class="form-select" required>
+                    <option value="" disabled selected>Seleccione una opción</option>
+              <option value="">Seleccione una opción</option>
+              <option>I. Tesis profesional</option>
+              <option>II. Proyecto</option>
+              <option>III. Seminario de titulación</option>
+              <option>IV. Posgrado</option>
+              <option>V. Promedio General Sobresaliente</option>
+              <option>VI. Memoria de experiencia profesional</option>
+              <option>VII. Examen EGEL</option>
+              <option>VIII. Residencia profesional</option>
+              <option>IX. Mérito Escolar</option>
+              <option>X. Intervención en la gestión docente</option>
+              <option>XI. Memoria de servicio social</option>
+            </select>
+          </div>
+
+          <!-- MUNICIPIO -->
+          <div class="mb-2">
+            <label>Municipio</label>
+            <select name="id_municipio" id="edit_municipio"
+                    class="form-select" required>
+              {% for m in municipios %}
+                <option value="{{ m.id_municipio }}">{{ m.nombre_municipio }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- LOCALIDAD -->
+          <div class="mb-2">
+            <label>Localidad</label>
+            <select name="id_localidad" id="edit_localidad"
+                    class="form-select" required>
+                    <option value="" disabled selected>Seleccione una localidad</option>
+              {% for l in localidades %}
+                <option value="{{ l.id_localidad }}"
+                        data-municipio="{{ l.id_municipio }}">
+                  {{ l.nombre_localidad }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- GÉNERO -->
+          <div class="mb-2">
+            <label>Género</label>
+            <select name="genero" id="edit_genero"
+                    class="form-select" required>
+              <option>Masculino</option>
+              <option>Femenino</option>
+              <option>Otro</option>
+            </select>
+          </div>
+
+          <!-- TELÉFONO -->
+          <div class="mb-2">
+            <label>Teléfono</label>
+            <input type="text" name="telefono" id="edit_telefono"
+                   class="form-control" required
+                   pattern="[0-9]{10}"
+                   maxlength="10"
+                   placeholder="Solo números">
+                   <div id="alert_edit_telefono" class="alert alert-danger" style="display:none"></div>
+
+          </div>
+
+          <!-- CORREO -->
+          <div class="mb-2">
+            <label>Correo</label>
+            <input type="email" name="correo" id="edit_correo"
+                   class="form-control" required
+                   maxlength="100"
+                   placeholder="Ej. nombre@gmail.com">
+                   <div id="alert_edit_correo" class="alert alert-danger" style="display:none"></div>
+
+          </div>
+
+          <!-- FOTO -->
+          <div class="mb-2">
+            <label>Fotografía</label>
+            <input type="file"
+              name="fotografia"
+              id="edit_fotoInput"
+              class="form-control"
+              accept="image/*">
+
+
+            <div id="edit_preview"
+                 style="width:130px;height:130px;border-radius:50%;
+                        overflow:hidden;margin:12px auto 0;
+                        border:2px solid #ccc;
+                        background-size:cover;
+                        background-position:center;">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+            Cancelar
+            </button>
+
+          <button class="btn btn-warning" type="submit">Actualizar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<script>
+document.getElementById("fotoInput").addEventListener("change", function(e){
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt){
+        document.getElementById("previewWrapper").style.backgroundImage =
+            "url('" + evt.target.result + "')";
+    }
+    reader.readAsDataURL(file);
+});
+</script>
+
+
+
+
+<footer class="footer text-center p-3 bg-dark text-white">
+© 2025 UMB San José del Rincón
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function toggleMenu(){
+    document.getElementById("menuPanel").classList.toggle("show");
+}
+function confirmarLogout(){
+    if(confirm("¿Seguro que deseas cerrar sesión?")){
+        window.location.href = "/logout";
+    }
+}
+const i=document.getElementById("inputBuscar"),
+b=document.getElementById("btnLimpiar"),
+f=document.getElementById("formBuscar");
+function x(){b.style.display=i.value?"flex":"none";}
+i.addEventListener("input",x);
+b.addEventListener("click",()=>{i.value="";f.submit();});
+x();
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  const municipio = document.getElementById("selectMunicipio");
+  const localidad = document.getElementById("selectLocalidad");
+  const estatus = document.getElementById("selectEstatus");
+  const modalidad = document.getElementById("selectModalidad");
+
+  /* ===== LOCALIDAD INICIA BLOQUEADA ===== */
+  localidad.disabled = true;
+
+  /* ===== MODALIDAD INICIA BLOQUEADA ===== */
+  modalidad.disabled = true;
+
+
+  /* ====== FILTRAR LOCALIDADES ====== */
+  municipio.addEventListener("change", function() {
+
+    const idMunicipio = this.value;
+
+    localidad.disabled = false;
+    localidad.value = "";
+
+    [...localidad.options].forEach(opt => {
+
+      // ignorar placeholder
+      if (!opt.value) return;
+
+      // municipio dueño
+      const dueño = opt.getAttribute("data-municipio");
+
+      if (dueño === idMunicipio) {
+        opt.style.display = "block";   // mostrar
+      } else {
+        opt.style.display = "none";    // ocultar
+      }
+
+    });
+
+  });
+
+
+  /* ====== ESTATUS → MODALIDAD ====== */
+  estatus.addEventListener("change", function() {
+
+    if (this.value === "Titulado" || this.value === "En proceso") {
+      modalidad.disabled = false;
+    } else {
+      modalidad.disabled = true;
+      modalidad.value = "";
+    }
+
+  });
+
+});
+</script>
+
+
+<script>
+function cargarEgresado(id){
+
+  fetch(`/api/egresado/${id}`)
+    .then(res => res.json())
+    .then(data => {
+
+      document.getElementById("edit_id").value = data.id_egresado;
+      document.getElementById("edit_nombre").value = data.nombre_completo;
+      document.getElementById("edit_matricula").value = data.matricula;
+      document.getElementById("edit_generacion").value = data.generacion;
+      document.getElementById("edit_telefono").value = data.telefono;
+      document.getElementById("edit_correo").value = data.correo;
+      document.getElementById("edit_estatus").value = data.estatus;
+
+      if(data.fotografia){
+        document.getElementById("edit_preview").style.backgroundImage =
+          `url('/static/uploads/egresados/${data.fotografia}')`;
+      } else {
+        document.getElementById("edit_preview").style.backgroundImage =
+          "url('/static/img/fondo_egresado.png')";
+      }
+
+    });
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  const editMunicipio = document.getElementById("edit_municipio");
+  const editLocalidad = document.getElementById("edit_localidad");
+  const editEstatus   = document.getElementById("edit_estatus");
+  const editModalidad = document.getElementById("edit_modalidad");
+
+  /* ===== LOCALIDAD INICIA BLOQUEADA ===== */
+  editLocalidad.disabled = true;
+
+  /* ===== MODALIDAD INICIA BLOQUEADA ===== */
+  editModalidad.disabled = true;
+
+  /* ===== MUNICIPIO → LOCALIDAD ===== */
+  editMunicipio.addEventListener("change", function(){
+
+    const idMunicipio = this.value;
+
+    editLocalidad.disabled = false;
+    editLocalidad.value = "";
+
+    [...editLocalidad.options].forEach(opt => {
+
+      if (!opt.value) return;
+
+      const dueño = opt.getAttribute("data-municipio");
+
+      if (dueño === idMunicipio) {
+        opt.style.display = "block";
+      } else {
+        opt.style.display = "none";
+      }
+
+    });
+  });
+
+  /* ===== ESTATUS → MODALIDAD ===== */
+  editEstatus.addEventListener("change", function(){
+
+    if (this.value === "Titulado" || this.value === "En proceso") {
+      editModalidad.disabled = false;
+    } else {
+      editModalidad.disabled = true;
+      editModalidad.value = "";
+    }
+
+  });
+
+});
+</script>
+
+
+<script>
+function cargarEgresado(id){
+
+  fetch(`/api/egresado/${id}`)
+    .then(res => res.json())
+    .then(data => {
+
+      // CAMPOS SIMPLES
+      edit_id.value        = data.id_egresado;
+      edit_nombre.value    = data.nombre_completo;
+      edit_matricula.value = data.matricula;
+      edit_generacion.value= data.generacion;
+      edit_telefono.value  = data.telefono;
+      edit_correo.value    = data.correo;
+
+      // SELECTS
+      edit_carrera.value   = data.id_carrera;
+      edit_genero.value    = data.genero;
+      edit_estatus.value   = data.estatus;
+
+      /* ===== ESTATUS → MODALIDAD ===== */
+      if (data.estatus === "Titulado" || data.estatus === "En proceso") {
+        edit_modalidad.disabled = false;
+        edit_modalidad.value = data.modalidad;
+      } else {
+        edit_modalidad.disabled = true;
+        edit_modalidad.value = "";
+      }
+
+      /* ===== MUNICIPIO → LOCALIDAD ===== */
+      edit_municipio.value = data.id_municipio;
+      edit_localidad.disabled = false;
+
+      [...edit_localidad.options].forEach(opt => {
+
+        if (!opt.value) return;
+
+        const dueño = opt.getAttribute("data-municipio");
+
+        if (dueño == data.id_municipio) {
+          opt.style.display = "block";
+        } else {
+          opt.style.display = "none";
+        }
+      });
+
+      edit_localidad.value = data.id_localidad;
+
+      /* ===== FOTO ===== */
+      if (data.fotografia) {
+        edit_preview.style.backgroundImage =
+          `url('/static/uploads/egresados/${data.fotografia}')`;
+      } else {
+        edit_preview.style.backgroundImage =
+          "url('/static/img/fondo_egresado.png')";
+      }
+
+    });
+}
+</script>
+
+<script>
+const modalEditar = document.getElementById("modalEditar");
+const formEditar  = modalEditar.querySelector("form");
+
+modalEditar.addEventListener("hidden.bs.modal", () => {
+
+  // Limpiar formulario
+  formEditar.reset();
+
+  // Resetear preview
+  document.getElementById("edit_preview").style.backgroundImage =
+    "url('/static/img/fondo_egresado.png')";
+
+  // Bloquear campos dependientes otra vez
+  document.getElementById("edit_localidad").disabled = true;
+  document.getElementById("edit_modalidad").disabled = true;
+
+});
+</script>
+
+
+
+
+
+<script>
+document.getElementById("edit_fotoInput").addEventListener("change", function(e){
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(evt){
+    document.getElementById("edit_preview").style.backgroundImage =
+      "url('" + evt.target.result + "')";
+  };
+
+  reader.readAsDataURL(file);
+});
+</script>
+
+<script>
+document.getElementById("form-egresado").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const form = e.target;
+    const datos = new FormData(form);
+
+    const res = await fetch("/registrar_egresado", {
+        method: "POST",
+        body: datos
+    });
+
+    const json = await res.json();
+
+    const orden = ["matricula","telefono","correo"];
+
+    // limpiar errores
+    orden.forEach(c=>{
+        const alerta = document.getElementById("alert_"+c);
+        const input = document.querySelector(`[name="${c}"]`);
+
+        if(alerta){
+            alerta.style.display = "none";
+            alerta.innerText = "";
+        }
+        if(input){
+            input.classList.remove("is-invalid");
+        }
+    });
+
+    if(json.ok){
+
+        const msg = document.getElementById("msg-exito");
+        msg.style.display = "block";
+
+        // 🔒 cerrar modal SOLO si existe
+        const modalEl = document.getElementById("modalNuevo");
+        if(modalEl){
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.hide();
+        }
+
+        form.reset();
+
+        setTimeout(() => {
+            window.location.href = "/egresados?pagina=1";
+        }, 800);
+
+
+        // ⏱ ocultar mensaje en 3 segundos
+        setTimeout(() => {
+            msg.style.display = "none";
+        }, 3000);
+
+        return;
+    }
+
+    // errores
+    for(const campo of orden){
+        if(json.errores && json.errores[campo]){
+            const div = document.getElementById("alert_"+campo);
+            const input = document.querySelector(`[name="${campo}"]`);
+
+            if(div){
+                div.innerText = json.errores[campo];
+                div.style.display = "block";
+            }
+
+            if(input){
+                input.classList.add("is-invalid");
+                input.focus();
+                input.scrollIntoView({
+                    behavior:"smooth",
+                    block:"center"
+                });
+            }
+            break;
+        }
+    }
+});
+
+</script>
+
+<script>
+document.querySelector("#modalEditar form").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const seguro = confirm("¿Estás seguro de actualizar este egresado?");
+    if(!seguro){
+        return; // ⛔ cancelar actualización
+    }
+
+
+    // habilitar campos bloqueados
+    edit_modalidad.disabled = false;
+    edit_localidad.disabled = false;
+
+    const form = this;
+    const datos = new FormData(form);
+
+    // limpiar alertas
+    ["matricula","telefono","correo"].forEach(campo => {
+        const alert = document.getElementById("alert_edit_" + campo);
+        if(alert){
+            alert.style.display = "none";
+            alert.innerText = "";
+        }
+    });
+
+    const res = await fetch("/actualizar_egresado", {
+        method: "POST",
+        body: datos
+    });
+
+    const json = await res.json();
+
+    if(!json.ok){
+        for(const campo in json.errores){
+            const alert = document.getElementById("alert_edit_" + campo);
+            if(alert){
+                alert.innerText = json.errores[campo];
+                alert.style.display = "block";
+                document.getElementById("edit_" + campo).focus();
+            }
+            break;
+        }
+        return;
+    }
+
+    // ✅ CERRAR MODAL
+    const modal = bootstrap.Modal.getInstance(
+        document.getElementById("modalEditar")
+    );
+    modal.hide();
+
+    // ✅ RECARGAR TABLA SIN CAMBIAR PÁGINA
+    location.reload();
+});
+</script>
+
+
+<script>
+const modalNuevo = document.getElementById("modalNuevo");
+const formNuevo  = document.getElementById("form-egresado");
+
+modalNuevo.addEventListener("hidden.bs.modal", () => {
+
+    // 🔹 limpiar formulario completo
+    formNuevo.reset();
+
+    // 🔹 ocultar alertas de error
+    ["matricula","telefono","correo"].forEach(campo => {
+        const alerta = document.getElementById("alert_" + campo);
+        if(alerta){
+            alerta.style.display = "none";
+            alerta.innerText = "";
+        }
+    });
+
+    // 🔹 quitar clases de error
+    formNuevo.querySelectorAll(".is-invalid").forEach(el => {
+        el.classList.remove("is-invalid");
+    });
+
+    // 🔹 resetear preview de foto
+    document.getElementById("previewWrapper").style.backgroundImage =
+        "url('/static/img/fondo_egresado.png')";
+
+    // 🔹 bloquear campos dependientes otra vez
+    document.getElementById("selectLocalidad").disabled = true;
+    document.getElementById("selectModalidad").disabled = true;
+});
+</script>
+
+<script>
+const input = document.getElementById("inputBuscar");
+const btnClear = document.getElementById("clearBuscar");
+
+let timer = null;   // ← para debounce
+const MIN_CHARS = 3; // ← mínimo de letras
+
+function actualizarTabla(busqueda){
+
+    fetch(`/egresados?buscar=${encodeURIComponent(busqueda)}`)
+    .then(r=>r.text())
+    .then(html=>{
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        document.querySelector("table").outerHTML =
+            doc.querySelector("table").outerHTML;
+
+        document.querySelector(".paginacion").outerHTML =
+            doc.querySelector(".paginacion").outerHTML;
+    });
+}
+
+
+// --- búsqueda con DELAY ---
+input.addEventListener("input", () => {
+
+    clearTimeout(timer); // ← cancela búsqueda anterior
+
+    const texto = input.value.trim();
+
+    // mostrar / ocultar X
+    btnClear.style.display = texto !== "" ? "flex" : "none";
+
+    // 🟨 Si no hay texto → restaurar lista completa
+    if(texto === ""){
+        timer = setTimeout(() => actualizarTabla(""), 200);
+        return;
+    }
+
+    // 🟥 No buscar hasta 3 letras
+    if(texto.length < MIN_CHARS){
+        return;
+    }
+
+    // 🟩 Esperar 500ms para buscar
+    timer = setTimeout(() => {
+        actualizarTabla(texto);
+    }, 500);
+});
+
+
+// --- botón X ---
+btnClear.addEventListener("click", ()=>{
+    input.value = "";
+    btnClear.style.display = "none";
+    actualizarTabla("");
+});
+</script>
+
+<script>
+function limpiarAlertasEditar(){
+
+  let campos = ["matricula","telefono","correo"];
+
+  campos.forEach(c=>{
+
+    let alerta = document.getElementById("alert_edit_"+c);
+    let input = document.getElementById("edit_"+c);
+
+    if(alerta){
+      alerta.style.display = "none";
+      alerta.innerText = "";
+    }
+
+    if(input){
+      input.classList.remove("is-invalid");
+    }
+
+  });
+
+}
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+    const modalEditar = document.getElementById("modalEditar");
+
+    if(!modalEditar){
+        console.error("No existe #modalEditar");
+        return;
+    }
+
+    const formEditar = modalEditar.querySelector("form");
+
+    function limpiarAlertasEditar(){
+
+        let campos = ["matricula","telefono","correo"];
+
+        campos.forEach(c=>{
+
+            let alerta = document.getElementById("alert_edit_"+c);
+            let input  = document.getElementById("edit_"+c);
+
+            if(alerta){
+                alerta.style.display = "none";
+                alerta.innerText = "";
+            }
+
+            if(input){
+                input.classList.remove("is-invalid");
+            }
+
+        });
+
+    }
+
+    // 🔹 Cuando se cierra el modal
+    modalEditar.addEventListener("hidden.bs.modal", ()=>{
+
+        if(formEditar){
+            formEditar.reset();
+        }
+
+        limpiarAlertasEditar();
+    });
+
+});
+</script>
+
+<script>
+const login2Modal = document.getElementById("login2Modal");
+
+login2Modal.addEventListener("hidden.bs.modal", function () {
+
+    // limpiar inputs
+    login2Modal.querySelector('input[name="correo"]').value = "";
+    login2Modal.querySelector('input[name="password"]').value = "";
+
+    // ocultar mensaje de error si existe
+    const errorMsg = login2Modal.querySelector(".text-danger");
+    if(errorMsg){
+        errorMsg.remove();
+    }
+});
+</script>
+
+{% if abrir_modal2 %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const modal = new bootstrap.Modal(
+        document.getElementById("login2Modal")
+    );
+    modal.show();
+});
+</script>
+{% endif %}
+
+
+
+</body>
+</html>

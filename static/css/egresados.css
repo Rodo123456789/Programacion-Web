@@ -1,0 +1,250 @@
+/* ======= ESTILOS GENERALES ======= */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+header.header h1 {
+    font-size: 2rem;
+}
+
+.modal-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.6rem; /* ajusta a tu gusto */
+}
+
+/* ======= HEADER ======= */
+.header {
+    background-color: #f2f2f2;
+    color: #333;
+    padding: 20px 0;
+}
+
+.header h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* ======= IMAGEN PRINCIPAL ======= */
+.main-image {
+    max-width: 80%;
+    height: auto;
+    border-radius: 10px;
+   
+}
+
+/* ======= FOOTER ======= */
+.footer {
+    background-color: #212529; /* mismo color del navbar */
+    color: white;
+    width: 100%;
+    margin-top: auto;
+}
+
+
+/* Imagen principal con control de tamaño */
+.main-image {
+    width: 70%;        /* Ajusta aquí el tamaño horizontal */
+    max-width: 550px;  /* Tamaño máximo permitido */
+    height: auto;      /* Mantiene proporción */
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;    /* Centrar la imagen */
+    
+}
+
+/* Si quieres que la imagen cambie especialmente para pantallas pequeñas */
+@media (max-width: 768px) {
+    .main-image {
+        width: 90%;    /* Más grande en móviles */
+    }
+}
+
+
+body{
+        display:flex;
+        flex-direction:column;
+        min-height:100vh;
+    }
+    main{
+        flex:1;
+    }
+
+    /* ===== PANEL DESPLEGABLE ===== */
+    .panel-menu{
+        position:fixed;
+        top:81px;
+        right:0;
+        width:240px;
+        bottom:56px;
+        background:white;
+        box-shadow:-5px 0 15px rgba(0,0,0,.2);
+        transform:translateX(100%);
+        opacity:0;
+        transition:all .35s ease;
+        z-index:9999;
+    }
+
+    .panel-menu.show{
+        transform:translateX(0);
+        opacity:1;
+    }
+
+    /* ===== Items del menú ===== */
+    .panel-menu .list-group-item{
+        border:0;
+        padding:14px 18px;
+        font-size:15px;
+        text-align:left;          /* ⬅⬅ alineado a la izquierda */
+        background:white;
+        transition:all .25s ease; /* animación */
+    }
+
+    /* ===== Animación al pasar ===== */
+    .panel-menu .list-group-item:hover{
+        background:#e9ecef;
+        padding-left:26px;        /* efecto deslizante */
+    }
+
+    /* ===== Cerrar sesión especial ===== */
+    .panel-menu .list-group-item.text-danger:hover{
+        background:#ffe5e5;
+        color:#b30000;
+        padding-left:26px;
+    }
+
+
+
+.paginacion{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 25px;
+    font-family: Arial;
+}
+
+.paginacion a{
+    text-decoration: none;
+    color: #2d2d2d;
+    font-weight: 500;
+}
+
+.paginacion .disabled{
+    color: #b5b5b5;
+}
+
+.pagina,
+.pagina-activa{
+    padding: 6px 12px;
+    border: 1px solid #d1d1d1;
+    border-radius: 5px;
+}
+
+.pagina{
+    background: white;
+}
+
+.pagina:hover{
+    background: #f3f3f3;
+}
+
+.pagina-activa{
+    background: white;
+    font-weight: bold;
+}
+
+
+
+.badge-estatus{
+    padding:6px 10px;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+.badge-egresado{
+    background:#b90202;
+    color:white;
+}
+
+.badge-seguimiento{
+    background:#ffe603;
+    color:#000;
+}
+
+.badge-titulado{
+    background:#026d05;
+    color:white;
+}
+
+.acciones-columna{
+    display: flex;
+    flex-direction: column;   /* vertical */
+    align-items: center;      /* centrado */
+    gap: 8px;                 /* separación */
+}
+
+.acciones-columna button{
+    min-width: 110px;         /* mismo ancho */
+    text-align: center;
+}
+
+.acciones-columna a{
+    min-width: 110px;         /* mismo ancho */
+    text-align: center;
+}
+
+.foto-circulo-tabla{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #000000;
+    margin: -7px;              /* 🔹 separación mínima con el borde */
+    display: inline-block;    /* 🔹 evita márgenes extra */
+}
+
+.foto-circulo-tabla img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.table tbody tr:hover > td{
+    background:#e4e4e4 !important;
+    cursor:pointer;
+}
+
+
+/* ===== BADGES DE ESTATUS EN UNA SOLA LÍNEA ===== */
+.badge-estatus {
+    white-space: nowrap;       /* ❌ no dividir texto */
+    display: inline-block;
+    padding: 6px 10px;
+    font-size: 0.85rem;        /* un poco más pequeño */
+    min-width: 90px;           /* ancho mínimo */
+    text-align: center;
+}
+
+.input-group{
+    margin-top: -50px;   /* 🔼 SUBE la lupa */
+    margin-bottom: 15px; /* separación con la tabla */
+    display: flex;
+    justify-content: flex-end;
+}
+
+
+/* Botón Actualizar */
+.btn-actualizar {
+    background-color: #1a73e8;   /* azul */
+    border-color: #1a73e8;
+    color: white;
+}
+
+.btn-actualizar:hover {
+    background-color: #0b5ed7;
+    border-color: #0b5ed7;
+}
+

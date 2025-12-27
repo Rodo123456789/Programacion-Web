@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Administradores</title>
+
+<link rel="icon" href="/static/img/favicon.ico" type="Image/x-icon">
+<link rel="stylesheet" href="/static/css/administradores.css" />
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <a class="navbar-brand" href="#">
+            <img src="/static/img/umb.png" alt="Logo" width="160" height="55" style="object-fit: cover;">
+        </a>
+
+        <button class="btn btn-outline-light ms-auto" onclick="toggleMenu()">
+            <i class="bi bi-list" style="font-size:1.5rem;"></i>
+        </button>
+
+    </div>
+</nav>
+
+<!-- PANEL DESPLEGABLE -->
+<div id="menuPanel" class="panel-menu">
+
+    <div class="text-center p-3 border-bottom">
+        <strong>Acciones</strong>
+    </div>
+
+    <div class="list-group list-group-flush">
+
+        <a href="/dashboard" class="list-group-item">Inicio</a>
+
+        <a href="/egresados" class="list-group-item">Egresados</a>
+
+        <button class="list-group-item text-danger d-flex align-items-center gap-2"
+                onclick="confirmarLogout()">
+            <i class="bi bi-box-arrow-right"></i>
+            Cerrar sesión
+        </button>
+
+    </div>
+</div>
+<div id="alerta-exito" class="alert alert-success text-center" 
+     style="display:none;">
+    Se ha registrado un nuevo administrador
+</div>
+
+
+<!-- CONTENIDO -->
+<main class="container mt-4">
+
+    <h2 class="text-center fw-bold">Administradores registrados</h2>
+
+    <!-- BOTÓN NUEVO -->
+    <div class="text-center mt-3 mb-3">
+        <button class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#modalNuevo">
+            <i class="bi bi-plus-circle"></i> Nuevo
+        </button>
+    </div>
+
+    <!-- BUSCADOR -->
+<form class="d-flex justify-content-end mb-3" onsubmit="return false;">
+  <div class="input-group" style="max-width:300px; position:relative;">
+    
+    <span class="input-group-text">
+      <i class="bi bi-search"></i>
+    </span>
+
+    <input type="text"
+      id="inputBuscar"
+      class="form-control"
+      placeholder="Buscar..."
+      value="{{ buscar }}"
+      autocomplete="off">
+
+    <!-- BOTÓN X -->
+    <span id="clearBuscar"
+      class="input-group-text"
+      style="cursor:pointer; display:none;">
+      <i class="bi bi-x"></i>
+    </span>
+
+  </div>
+</form>
+
+
+    <!-- TABLA -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido paterno</th>
+                    <th>Apellido materno</th>
+                    <th>Cargo</th>
+                    <th>Correo</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for admin in administradores %}
+                <tr>
+                    <td>{{ admin.nombre }}</td>
+                    <td>{{ admin.apellido_paterno }}</td>
+                    <td>{{ admin.apellido_materno }}</td>
+                    <td>{{ admin.cargo }}</td>
+                    <td>{{ admin.correo }}</td>
+                    <td>{{ admin.telefono }}</td>
+                    <td>
+                        <a href="#" class="btn btn-warning btn-sm btn-accion"
+                            onclick="abrirModalEditar('{{ admin.id_admin }}')">
+                            Actualizar
+                            </a>
+
+
+
+                        <button class="btn btn-danger btn-sm btn-accion"
+                                onclick="eliminarAdmin('{{ admin.id_admin }}')">
+                            Eliminar
+                        </button>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINADO -->
+<div class="paginacion">
+
+{# ===== ANTERIOR ===== #}
+{% if pagina > 1 %}
+    <a href="?pagina={{ pagina-1 }}&buscar={{ buscar }}">Anterior</a>
+{% else %}
+    <span class="disabled">Anterior</span>
+{% endif %}
+
+{# ===== PRIMERA PÁGINA ===== #}
+{% if pagina == 1 %}
+    <span class="pagina-activa">1</span>
+{% else %}
+    <a class="pagina" href="?pagina=1&buscar={{ buscar }}">1</a>
+{% endif %}
+
+{# ===== PUNTOS SI HAY SALTO ===== #}
+{% if pagina > 3 %}
+    <span class="puntos">...</span>
+{% endif %}
+
+{# ===== PÁGINA ACTUAL (SI NO ES 1 NI ÚLTIMA) ===== #}
+{% if pagina > 1 and pagina < total_paginas %}
+    <span class="pagina-activa">{{ pagina }}</span>
+{% endif %}
+
+{# ===== PUNTOS ANTES DE LA ÚLTIMA ===== #}
+{% if pagina < total_paginas - 2 %}
+    <span class="puntos">...</span>
+{% endif %}
+
+{# ===== ÚLTIMA PÁGINA ===== #}
+{% if total_paginas > 1 %}
+    {% if pagina == total_paginas %}
+        <span class="pagina-activa">{{ total_paginas }}</span>
+    {% else %}
+        <a class="pagina" href="?pagina={{ total_paginas }}&buscar={{ buscar }}">
+            {{ total_paginas }}
+        </a>
+    {% endif %}
+{% endif %}
+
+{# ===== SIGUIENTE ===== #}
+{% if pagina < total_paginas %}
+    <a href="?pagina={{ pagina+1 }}&buscar={{ buscar }}">Siguiente</a>
+{% else %}
+    <span class="disabled">Siguiente</span>
+{% endif %}
+
+</div>
+
+</main>
+
+
+
+
+<!-- =========================
+     MODAL NUEVO ADMIN
+========================= -->
+<div class="modal fade" id="modalNuevo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST" action="/registrar_admin" id="formNuevoAdmin">
+
+
+        <div class="modal-header">
+          <h5 class="modal-title">Registrar administrador</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="mb-3">
+                <label>Nombre</label>
+                <input type="text" name="nombre" class="form-control"
+                       required
+                       pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+                       title="Solo letras y espacios">
+            </div>
+
+            <div class="mb-3">
+                <label>Apellido paterno</label>
+                <input type="text" name="apellido_paterno" class="form-control"
+                       required
+                       pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+                       title="Solo letras y espacios">
+            </div>
+
+            <div class="mb-3">
+                <label>Apellido materno</label>
+                <input type="text" name="apellido_materno" class="form-control"
+                       required
+                       pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+                       title="Solo letras y espacios">
+            </div>
+
+            <div class="mb-3">
+                <label>Cargo</label>
+                <input type="text" name="cargo" class="form-control"
+                       required
+                       pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ ]+"
+                       title="Solo letras y espacios">
+            </div>
+
+            <div class="mb-3">
+                <label>Correo</label>
+                <input type="email" name="correo" id="correo" class="form-control" required>
+                <div class="invalid-feedback" id="error-correo"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Teléfono</label>
+                <input type="text" name="telefono" id="telefono"
+                    class="form-control" required minlength="8" maxlength="10">
+                <div class="invalid-feedback" id="error-telefono"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Contraseña</label>
+
+                <div class="input-group">
+                    <input type="password"
+                        name="password"
+                        id="password"
+                        class="form-control {% if errores and errores.get('password') %}is-invalid{% endif %}"
+                        required
+                        minlength="3"
+                        maxlength="8"
+                        title="Entre 3 y 8 caracteres">
+
+                    <span class="input-group-text" style="cursor:pointer"
+                        onclick="togglePassword()">
+                        <i class="bi bi-eye-slash" id="iconPassword"></i>
+
+                    </span>
+                </div>
+            </div>
+<!--..............................................................................................................................-->
+<!--MODAL DE ACTUALIZAR ADMIN-->
+
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Registrar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- FOOTER -->
+<footer class="footer text-center p-3 bg-dark text-white">
+    <p>© 2025 UMB San José del Rincón</p>
+</footer>
+
+
+<!-- =========================
+     MODAL EDITAR ADMIN
+========================= -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form id="formEditarAdmin">
+
+        <div class="modal-header">
+          <h5 class="modal-title">Editar administrador</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+            <input type="hidden" name="id_admin" id="edit_id_admin">
+
+            <div class="mb-3">
+                <label>Nombre</label>
+                <input type="text" id="edit_nombre" name="nombre" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Apellido paterno</label>
+                <input type="text" id="edit_apellido_paterno" name="apellido_paterno" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Apellido materno</label>
+                <input type="text" id="edit_apellido_materno" name="apellido_materno" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Cargo</label>
+                <input type="text" id="edit_cargo" name="cargo" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Correo</label>
+                <input type="email" id="edit_correo" name="correo" class="form-control" required>
+                <div class="invalid-feedback" id="edit-error-correo"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Teléfono</label>
+                <input type="text" id="edit_telefono" name="telefono" class="form-control" required>
+                <div class="invalid-feedback" id="edit-error-telefono"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Contraseña (opcional)</label>
+                <input type="password" id="edit_password" name="password" class="form-control">
+                <small>Déjala vacía si no quieres cambiarla</small>
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning">Actualizar</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function toggleMenu(){
+    document.getElementById("menuPanel").classList.toggle("show");
+}
+
+function confirmarLogout(){
+    if(confirm("¿Seguro que deseas cerrar sesión?")){
+        window.location.href = "/logout";
+    }
+}
+</script>
+
+<script>
+function togglePassword(){
+    const input = document.getElementById("password");
+    const icon = document.getElementById("iconPassword");
+
+    if(input.type === "password"){
+        // Mostrar contraseña
+        input.type = "text";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+    } else {
+        // Ocultar contraseña
+        input.type = "password";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+    }
+}
+</script>
+
+
+<script>
+const modalNuevo = document.getElementById('modalNuevo');
+const formNuevoAdmin = document.getElementById('formNuevoAdmin');
+
+modalNuevo.addEventListener('hidden.bs.modal', function () {
+    formNuevoAdmin.reset();
+
+    // Asegura que la contraseña quede oculta y el icono correcto
+    const password = document.getElementById("password");
+    const icon = document.getElementById("iconPassword");
+
+    if(password){
+        password.type = "password";
+    }
+    if(icon){
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+    }
+});
+</script>
+
+<script>
+document.getElementById("formNuevoAdmin").addEventListener("submit", function(e){
+    e.preventDefault(); // ⛔ NO recarga
+
+    // limpiar errores previos
+    limpiarErrores();
+
+    const form = this;
+    const formData = new FormData(form);
+
+    fetch("/registrar_admin", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.status === "error"){
+            if(data.errores.correo){
+                mostrarError("correo", data.errores.correo);
+            }
+            if(data.errores.telefono){
+                mostrarError("telefono", data.errores.telefono);
+            }
+            return;
+        }
+
+                    // ✅ éxito
+            bootstrap.Modal.getInstance(
+                document.getElementById("modalNuevo")
+            ).hide();
+
+            // 🔹 Guardar bandera temporal
+            sessionStorage.setItem("admin_registrado", "ok");
+
+            // 🔄 Recargar
+            location.reload();
+
+    });
+});
+
+function mostrarError(campo, mensaje){
+    const input = document.getElementById(campo);
+    const errorDiv = document.getElementById("error-" + campo);
+
+    input.classList.add("is-invalid");
+    errorDiv.textContent = mensaje;
+}
+
+function limpiarErrores(){
+    ["correo","telefono"].forEach(campo => {
+        document.getElementById(campo).classList.remove("is-invalid");
+        document.getElementById("error-" + campo).textContent = "";
+    });
+}
+</script>
+
+<script>
+function abrirModalEditar(id){
+
+    fetch("/obtener_admin/" + id)
+    .then(r => r.json())
+    .then(data => {
+
+        document.getElementById("edit_id_admin").value = data.id_admin;
+        document.getElementById("edit_nombre").value = data.nombre;
+        document.getElementById("edit_apellido_paterno").value = data.apellido_paterno;
+        document.getElementById("edit_apellido_materno").value = data.apellido_materno;
+        document.getElementById("edit_cargo").value = data.cargo;
+        document.getElementById("edit_correo").value = data.correo;
+        document.getElementById("edit_telefono").value = data.telefono;
+
+        const modal = new bootstrap.Modal(document.getElementById("modalEditar"));
+        modal.show();
+    });
+}
+</script>
+
+<script>
+document.getElementById("formEditarAdmin").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    // limpiar errores anteriores
+    limpiarErroresEditar();
+
+    // confirmar actualización
+    if(!confirm("¿Estás seguro de actualizar el administrador?")){
+        return;
+    }
+
+    const formData = new FormData(this);
+
+    fetch("/actualizar_admin",{
+        method:"POST",
+        body: formData
+    })
+    .then(r=>r.json())
+    .then(data=>{
+
+        // 🟥 Si hay errores de duplicado
+        if(data.status === "error"){
+
+            if(data.errores && data.errores.correo){
+                mostrarErrorEditar("correo", data.errores.correo);
+            }
+
+            if(data.errores && data.errores.telefono){
+                mostrarErrorEditar("telefono", data.errores.telefono);
+            }
+
+            return;
+        }
+
+        // 🟩 Si todo salió bien
+        if(data.status === "ok"){
+            bootstrap.Modal.getInstance(
+                document.getElementById("modalEditar")
+            ).hide();
+
+            location.reload();
+        }
+    });
+});
+
+
+function mostrarErrorEditar(campo, mensaje){
+    const input = document.getElementById("edit_" + campo);
+    const errorDiv = document.getElementById("edit-error-" + campo);
+
+    input.classList.add("is-invalid");
+    errorDiv.textContent = mensaje;
+}
+
+function limpiarErroresEditar(){
+    ["correo","telefono"].forEach(campo=>{
+        document.getElementById("edit_" + campo).classList.remove("is-invalid");
+        document.getElementById("edit-error-" + campo).textContent = "";
+    });
+}
+</script>
+
+<script>
+function eliminarAdmin(id){
+
+    if(!confirm("¿Estás seguro de eliminar a este administrador?")){
+        return;
+    }
+
+    fetch("/eliminar_admin/" + id, {
+        method: "POST"
+    })
+    .then(r => r.json())
+    .then(data => {
+
+        if(data.status === "ok"){
+            // mantiene página y filtros
+            location.reload();
+        }
+
+    });
+}
+</script>
+
+<script>
+const modalEditar = document.getElementById('modalEditar');
+
+modalEditar.addEventListener('hidden.bs.modal', function () {
+
+    // limpiar inputs invalid
+    ["correo","telefono"].forEach(campo=>{
+        document.getElementById("edit_" + campo).classList.remove("is-invalid");
+        document.getElementById("edit-error-" + campo).textContent = "";
+    });
+
+    // limpiar password opcional
+    document.getElementById("edit_password").value = "";
+});
+</script>
+
+<script>
+const input = document.getElementById("inputBuscar");
+const btnClear = document.getElementById("clearBuscar");
+
+let timer = null;   // ← para debounce
+const MIN_CHARS = 3; // ← mínimo de letras
+
+function actualizarTabla(busqueda){
+
+    fetch(`/administradores?buscar=${encodeURIComponent(busqueda)}`)
+    .then(r=>r.text())
+    .then(html=>{
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+
+        // SOLO reemplaza la tabla
+        document.querySelector("table").outerHTML =
+            doc.querySelector("table").outerHTML;
+
+        // SOLO reemplaza la paginación
+        document.querySelector(".paginacion").outerHTML =
+            doc.querySelector(".paginacion").outerHTML;
+
+    });
+}
+
+
+// --- búsqueda con DELAY ---
+input.addEventListener("input", () => {
+
+    clearTimeout(timer); // ← cancela búsqueda anterior
+
+    const texto = input.value.trim();
+
+    // mostrar / ocultar X
+    btnClear.style.display = texto !== "" ? "flex" : "none";
+
+    // 🟨 Si no hay texto → restaurar lista completa
+    if(texto === ""){
+        timer = setTimeout(() => actualizarTabla(""), 200);
+        return;
+    }
+
+    // 🟥 No buscar hasta 3 letras
+    if(texto.length < MIN_CHARS){
+        return;
+    }
+
+    // 🟩 Esperar 500ms para buscar
+    timer = setTimeout(() => {
+        actualizarTabla(texto);
+    }, 500);
+});
+
+
+// --- botón X ---
+btnClear.addEventListener("click", ()=>{
+    input.value = "";
+    btnClear.style.display = "none";
+    actualizarTabla("");
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", ()=>{
+
+    if(sessionStorage.getItem("admin_registrado")){
+
+        const alerta = document.getElementById("alerta-exito");
+
+        alerta.style.display = "block";
+
+        // borrar bandera para que no reaparezca
+        sessionStorage.removeItem("admin_registrado");
+
+        // desaparecer en 3s
+        setTimeout(()=>{
+            alerta.style.display = "none";
+        },3000);
+    }
+
+});
+</script>
+
+</body>
+</html>
