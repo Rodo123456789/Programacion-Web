@@ -109,7 +109,7 @@
                             placeholder="********" required>
 
                         <span class="input-group-text" id="togglePassword2">
-                            <i class="bi bi-eye" id="iconEye2"></i>
+                            <i class="bi bi-eye-slash" id="iconEye2"></i>
                         </span>
                     </div>
 
@@ -147,22 +147,8 @@ function confirmarLogout(){
 </script>
 
 <!-- Mostrar / Ocultar contraseña -->
-<script>
-document.getElementById("togglePassword2").addEventListener("click", function () {
-    const pwd = document.getElementById("passwordInput2");
-    const icon = document.getElementById("iconEye2");
 
-    if (pwd.type === "password") {
-        pwd.type = "text";
-        icon.classList.remove("bi-eye");
-        icon.classList.add("bi-eye-slash");
-    } else {
-        pwd.type = "password";
-        icon.classList.remove("bi-eye-slash");
-        icon.classList.add("bi-eye");
-    }
-});
-</script>
+
 
 <!-- 💡 ABRIR MODAL LOGIN2 SI HAY ERROR -->
 {% if abrir_modal2 %}
@@ -187,6 +173,48 @@ login2Modal.addEventListener("hidden.bs.modal", function () {
     if(errorMsg){
         errorMsg.remove();
     }
+});
+</script>
+<script>
+document.getElementById("togglePassword2").addEventListener("click", function () {
+
+    const pwd  = document.getElementById("passwordInput2");
+    const icon = document.getElementById("iconEye2");
+
+    if (pwd.type === "password") {
+
+        // Mostrar contraseña
+        pwd.type = "text";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+
+    } else {
+
+        // Ocultar contraseña
+        pwd.type = "password";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+    }
+});
+
+
+</script>
+
+
+<script>
+
+
+login2Modal.addEventListener("show.bs.modal", function () {
+
+    const pwd  = document.getElementById("passwordInput2");
+    const icon = document.getElementById("iconEye2");
+
+    // Siempre ocultar contraseña
+    pwd.type = "password";
+
+    // Siempre poner ojo cerrado
+    icon.classList.remove("bi-eye");
+    icon.classList.add("bi-eye-slash");
 });
 </script>
 

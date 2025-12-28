@@ -276,3 +276,13 @@ header.header h1 {
     z-index: 99998 !important;
 }
 
+/* Asegurar que los labels se muestren bien */
+#loginModal .form-label {
+    display: block;
+    margin-top: 12px;
+}
+
+/* Separar el input de contraseña */
+#loginModal .input-group {
+    margin-top: 6px;
+}

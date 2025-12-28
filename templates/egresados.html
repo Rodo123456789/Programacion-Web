@@ -72,15 +72,15 @@
                         placeholder="Agrega el correo electrónico" required>
 
                     <label class="form-label mt-3">Contraseña</label>
-                    
-                    <div class="input-group">
-                        <input type="password" class="form-control"
-                            name="password" id="passwordInput2"
-                            placeholder="********" required>
 
-                        <span class="input-group-text" id="togglePassword2">
-                            <i class="bi bi-eye" id="iconEye2"></i>
-                        </span>
+                    <div class="input-group">
+                      <input type="password" class="form-control"
+                        name="password" id="passwordInput2"
+                        placeholder="********" required>
+
+                      <span class="input-group-text" id="togglePassword2" style="cursor:pointer;">
+                        <i class="bi bi-eye-slash" id="iconEye2"></i>
+                      </span>
                     </div>
 
                     {% if error2 %}
@@ -1274,6 +1274,58 @@ document.addEventListener("DOMContentLoaded", () => {
 {% endif %}
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  const input = document.getElementById("passwordInput2");
+  const toggle = document.getElementById("togglePassword2");
+  const icon = document.getElementById("iconEye2");
+
+  toggle.addEventListener("click", function(){
+
+    if(input.type === "password"){
+      input.type = "text";
+      icon.classList.remove("bi-eye-slash");
+      icon.classList.add("bi-eye");
+    } else {
+      input.type = "password";
+      icon.classList.remove("bi-eye");
+      icon.classList.add("bi-eye-slash");
+    }
+
+  });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  const modal = document.getElementById("login2Modal");
+  const email = modal.querySelector('input[name="correo"]');
+  const pass  = modal.querySelector('input[name="password"]');
+  const icon  = document.getElementById("iconEye2");
+
+  modal.addEventListener("hidden.bs.modal", function () {
+
+      // limpiar campos
+      email.value = "";
+      pass.value = "";
+
+      // ocultar contraseña
+      pass.type = "password";
+
+      // ojo cerrado
+      icon.classList.remove("bi-eye");
+      icon.classList.add("bi-eye-slash");
+
+      // borrar errores si existen
+      const msg = modal.querySelector(".text-danger");
+      if(msg){ msg.remove(); }
+
+  });
+
+});
+</script>
 
 </body>
 </html>
