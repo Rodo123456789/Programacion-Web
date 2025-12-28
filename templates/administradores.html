@@ -58,7 +58,7 @@
 
 <!-- CONTENIDO -->
 <main class="container mt-4">
-
+<br><br><br><br>
     <h2 class="text-center fw-bold">Administradores registrados</h2>
 
     <!-- BOTÓN NUEVO -->
@@ -119,19 +119,21 @@
                     <td>{{ admin.correo }}</td>
                     <td>{{ admin.telefono }}</td>
                     <td>
-                        <a href="#" class="btn btn-warning btn-sm btn-accion"
-                            onclick="abrirModalEditar('{{ admin.id_admin }}')">
-                            Actualizar
+                        <div class="acciones-btns">
+
+                            <a href="#" class="btn btn-warning btn-sm btn-accion"
+                                onclick="abrirModalEditar('{{ admin.id_admin }}')">
+                                Actualizar
                             </a>
 
+                            <button class="btn btn-danger btn-sm btn-accion"
+                                    onclick="eliminarAdmin('{{ admin.id_admin }}')">
+                                Eliminar
+                            </button>
 
-
-                        <button class="btn btn-danger btn-sm btn-accion"
-                                onclick="eliminarAdmin('{{ admin.id_admin }}')">
-                            Eliminar
-                        </button>
-
+                        </div>
                     </td>
+
                 </tr>
                 {% endfor %}
             </tbody>

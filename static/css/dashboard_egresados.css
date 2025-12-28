@@ -114,3 +114,75 @@ body{
         color:#b30000;
         padding-left:26px;
     }
+
+    /* Asegura que el menú quede debajo del modal */
+.panel-menu{
+    z-index: 1030 !important;
+}
+
+/* Fondo del modal */
+.modal-backdrop{
+    z-index: 2040 !important;
+}
+
+/* Ventana del modal */
+.modal{
+    z-index: 2050 !important;
+}
+
+
+
+/* =========================================================
+   ⭐⭐  A PARTIR DE AQUÍ — SOLO SE AGREGA SIN CAMBIAR NADA ⭐⭐
+=========================================================*/
+
+/* === NAVBAR SIEMPRE FIJA ARRIBA === */
+.navbar{
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 4000;
+}
+
+/* === FOOTER SIEMPRE FIJO ABAJO === */
+.footer{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 3000;
+}
+
+/* === PARA QUE EL CONTENIDO NO SE TAPE === */
+main{
+    margin-top: 70px;    /* ajusta si tu navbar mide más */
+    margin-bottom: 70px; /* coincide con footer */
+}
+
+/* === PANEL LATERAL AJUSTADO ENTRE NAVBAR Y FOOTER === */
+.panel-menu{
+    top:70px;      /* navbar */
+    bottom:70px;   /* footer */
+    height: calc(100vh - 70px - 70px);
+}
+
+/* 🔝 Fuerza el modal a estar siempre encima */
+#login2Modal {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99999 !important;  /* SUPERIOR A TODO */
+}
+
+/* 🔝 Caja del formulario */
+#login2Modal .modal-dialog {
+    z-index: 100000 !important;
+}
+
+/* 🔝 Fondo oscuro del modal */
+.modal-backdrop {
+    z-index: 99998 !important;
+}

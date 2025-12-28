@@ -51,9 +51,56 @@
 </div>
 
 
+<!-- ======================= -->
+<!--   MODAL LOGIN2          -->
+<!-- ======================= -->
+<div class="modal fade" id="login2Modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Solo personal autorizado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form action="/login2" method="POST">
+
+                <div class="modal-body">
+
+                    <label class="form-label">Usuario</label>
+                    <input type="email" class="form-control" name="correo"
+                        placeholder="Agrega el correo electrónico" required>
+
+                    <label class="form-label mt-3">Contraseña</label>
+                    
+                    <div class="input-group">
+                        <input type="password" class="form-control"
+                            name="password" id="passwordInput2"
+                            placeholder="********" required>
+
+                        <span class="input-group-text" id="togglePassword2">
+                            <i class="bi bi-eye" id="iconEye2"></i>
+                        </span>
+                    </div>
+
+                    {% if error2 %}
+                    <p class="text-danger text-center mt-2">{{ error2 }}</p>
+                    {% endif %}
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-dark w-100">Acceder</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- CONTENIDO -->
 <main class="container-fluid mt-4 px-4">
-
+<br><br><br>
 <h2 class="text-center fw-bold">Egresados registrados</h2>
 
 <div class="text-center mt-3 mb-3">
@@ -234,54 +281,7 @@
 
 </main>
 
-<!-- ======================= -->
-<!--   MODAL LOGIN2          -->
-<!-- ======================= -->
-<div class="modal fade" id="login2Modal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-3">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Solo personal autorizado</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <form action="/login2" method="POST">
-
-                <div class="modal-body">
-
-                    <label class="form-label">Usuario</label>
-                    <input type="email" class="form-control" name="correo"
-                        placeholder="Agrega el correo electrónico" required>
-
-
-                    <label class="form-label mt-3">Contraseña</label>
-                    <h1>CONTRA</h1>
-
-                    <div class="input-group">
-                        <input type="password" class="form-control"
-                            name="password" id="passwordInput2"
-                            placeholder="********" required>
-
-                        <span class="input-group-text" id="togglePassword2">
-                            <i class="bi bi-eye" id="iconEye2"></i>
-                        </span>
-                    </div>
-
-                    {% if error2 %}
-                    <p class="text-danger text-center mt-2">{{ error2 }}</p>
-                    {% endif %}
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-dark w-100">Acceder</button>
-                </div>
-
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- MODAL NUEVO EGRESADO -->
 <div class="modal fade" id="modalNuevo" tabindex="-1">
